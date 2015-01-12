@@ -92,12 +92,19 @@ def send_song(files, config):
 
 def send_np(config):
     result = send_get("http://" + config["host"] + "/srv/v1.0/song")
-    print(result)
+    print("Now Playing: {} - {}".format(result["text"][0]["artist"], result["text"][0]["title"]))
 
 
 def send_playlist(_, config):
-    result = send_get("http://" + config["host"] + "/srv/v1.0/queue")
-    print(result)
+    result = send_get("http://" + config["host"] + "/srv/v1.0/queue/" + str(_))
+    if result:
+        for i, res in enumerate(result["text"]):
+            if "artist" in res and "title" in res:
+                print("In queue place {}: {} - {}".format(i, res["artist"], res["title"]))
+            elif "file" in res:
+                print("In queue place {}: {!r}".format(i, res["file"]))
+            else:
+                print("In queue place {}: undefined".format(i))
 
 
 def send_skip(config):
