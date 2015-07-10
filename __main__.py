@@ -35,8 +35,12 @@ def wrap_request(method, *args_, **kwargs):
         return data.json()
     except requests.exceptions.ConnectionError as e:
         print("Connection error: " + str(e))
-    except ValueError:
-        print("Invalid JSON received: " + data.text)
+    except ValueError as e:
+        if data is not None:
+            print("Invalid JSON received: " + data.text)
+        else:
+            print("An error occurred while constructing the request:")
+            raise e
 
 
 def send_post(url, **kwargs):
@@ -63,7 +67,7 @@ def send_song(files, config):
 
         # URI
         if not os.path.exists(fn):
-            data["url"] = fn
+            data["url"] = fn.decode(errors="decode_backslashreplace")
             result = send_post(url_base + "/song", data=json.dumps(data))
             if result is not None:
                 print(result["text"])
@@ -81,7 +85,7 @@ def send_song(files, config):
 
         print("File not found on the server, sending")
         song.seek(0)
-        result = send_post(url_base + "/file", files={'file': song})
+        result = send_post(url_base + "/file", files={'file': ("upload." + fn.rsplit(".", 1)[-1], song)})
         if result is not None:
             print("File sent successfully, adding to playlist")
             data["url"] = result["key"]
@@ -92,7 +96,11 @@ def send_song(files, config):
 
 def send_np(config):
     result = send_get("http://" + config["host"] + "/srv/v1.0/song")
-    print("Now Playing: {} - {} ({} seconds)".format(result["text"][0]["artist"], result["text"][0]["title"], result["text"][0]["time"]))
+    print("Now playing: {} - {} ({} seconds)".format(
+        result["text"][0]["artist"],
+        result["text"][0]["title"],
+        result["text"][0]["time"])
+    )
 
 
 def send_playlist(_, config):
