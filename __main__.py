@@ -87,8 +87,8 @@ def send_song(files, config):
         song.seek(0)
         result = send_post(url_base + "/file", files={'file': ("upload." + fn.rsplit(".", 1)[-1], song)})
         if result is not None:
-            if "saved" not in data or not data["saved"]:
-                print("Error, file not saved: " + data["text"])
+            if "saved" not in result or not result["saved"]:
+                print("Error, file not saved: " + result["text"])
                 return
             print("File sent successfully, adding to playlist")
             data["url"] = result["key"]
