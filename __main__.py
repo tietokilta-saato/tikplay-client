@@ -87,10 +87,10 @@ def send_song(files, config):
         song.seek(0)
         result = send_post(url_base + "/file", files={'file': ("upload." + fn.rsplit(".", 1)[-1], song)})
         if result is not None:
-            print("File sent successfully, adding to playlist")
-            if "error" in data:
-                print("Error: " + data["error"])
+            if "saved" not in data or not data["saved"]:
+                print("Error, file not saved: " + data["text"])
                 return
+            print("File sent successfully, adding to playlist")
             data["url"] = result["key"]
             result = send_post(url_base + "/song", data=json.dumps(data))
             if result is not None:
