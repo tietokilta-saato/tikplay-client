@@ -80,7 +80,10 @@ def send_song(files, config):
 
         # URI
         if not os.path.exists(fn):
-            data["url"] = fn.decode(errors="decode_backslashreplace")
+            if type(fn) != str:
+                data["url"] = fn.decode(errors="decode_backslashreplace")
+            else:
+                data["url"] = fn
             result = send_post(url_base + "/song", data=json.dumps(data))
             if result is not None:
                 print(result["text"])
