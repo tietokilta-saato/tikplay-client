@@ -43,6 +43,19 @@ def wrap_request(method, *args_, **kwargs):
             raise e
 
 
+def format_time(secs):
+    secs = int(secs)
+    out = []
+    if secs > 3600:
+        hours, secs = divmod(secs, 3600)
+        out.append("{}h".format(hours))
+    if secs > 60:
+        minutes, secs = divmod(secs, 60)
+        out.append("{}m".format(minutes))
+    out.append("{}s".format(secs))
+    return " ".join(out)
+
+
 def send_post(url, **kwargs):
     return wrap_request(requests.post, url, **kwargs)
 
@@ -111,11 +124,16 @@ def send_playlist(_, config):
     if result:
         for i, res in enumerate(result["text"]):
             if "artist" in res and "title" in res:
-                print("In queue place {}: {} - {} ({} seconds)".format(i, res["artist"], res["title"], res["time"]))
+                song_name = "{} - {}".format(res["artist"], res["title"])
             elif "file" in res:
-                print("In queue place {}: {!r}".format(i, res["file"]))
+                song_name = res["file"]
             else:
-                print("In queue place {}: undefined".format(i))
+                song_name = "unknown"
+            if "time" in res:
+                time_part = " ({})".format(format_time(res["time"]))
+            else:
+                time_part = ""
+            print("Queue #{}: {}{}".format(i, song_name, time_part))
 
 
 def send_skip(config):
